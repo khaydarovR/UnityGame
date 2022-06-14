@@ -14,5 +14,5 @@ public class Events : MonoBehaviour
         //Debug.Log("Оповещение - Сенсор не в земле");
     }
 
-    //TO DO
+    //TO DO: OnDie, OnChangeHealth
 }
