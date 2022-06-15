@@ -4,33 +4,25 @@ using UnityEngine;
 
 public abstract class Sensor : MonoBehaviour
 {
-    [SerializeField] private int _countCollider = 0;
     [SerializeField] private LayerMask _sensorFor;
 
+    [SerializeField] protected bool IsGrounded = false;
 
-    private void OnCollisionEnter2D(Collision2D collision)
+
+
+
+    private void OnCollisionStay2D(Collision2D collision)
     {
-
-        if ((_sensorFor & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
+        foreach (var i in collision.contacts)
         {
-
-            _countCollider++;
-
+            if (i.normal.y > 0.8 && (_sensorFor & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
+                IsGrounded = true;
+            Debug.Log(i.normal.y);
         }
     }
-
     private void OnCollisionExit2D(Collision2D collision)
     {
         if ((_sensorFor & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
-        {
-
-            _countCollider--;
-        }
-    }
-
-    public int GetCountCollider()
-    {
-        Debug.Log("количество пересещений с колайдерами" + _countCollider);
-        return _countCollider;
+            IsGrounded = false;
     }
 }

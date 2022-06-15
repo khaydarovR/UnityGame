@@ -4,21 +4,16 @@ using UnityEngine;
 
 public class SensorGround : Sensor
 {
-
+    //[SerializeField] private BoxCollider2D boxCollider2D;
 
     private void Update()
     {
-        if (base.GetCountCollider() <= 0)
-        {
-            Events.OnAir(true);
-            //Debug.Log("Отправка - Сенсор НЕ в земле");
-        }
-        else
-        {
-            Events.OnAir(false);
-            //Debug.Log("Отправка - Сенсор НА  в земле");
-        }
 
+        if (base.IsGrounded == true)
+            Events.OnAir(false);
+        else
+            Events.OnAir(true);
+        Debug.Log("На земле:" + IsGrounded);
 
     }
 
