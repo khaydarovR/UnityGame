@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class CharacterInput : MonoBehaviour
 {
@@ -12,23 +13,29 @@ public class CharacterInput : MonoBehaviour
 
     public bool IsRun()
     {
-        if (GetDirectionsX() != 0 && Input.GetKey(KeyCode.LeftShift))
+        if (GetDirectionsX() != 0 && Input.GetKey(KeyCode.LeftShift) == true)
             return true;
         else
             return false;
-
-        
     }
 
+    public bool IsWalk()
+    {
+        if (GetDirectionsX() != 0 && IsRun() == false)
+            return true;
+        else
+            return false;
+    }
     public bool IsJump()
     {
         return Input.GetKey(KeyCode.Space);
     }
+
+
     public bool IsRespawn()
     {
         return Input.GetKey(KeyCode.R);
     }
-
 }
 
 
