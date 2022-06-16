@@ -17,7 +17,6 @@ public abstract class Sensor : MonoBehaviour
         {
             if (i.normal.y > 0.8 && (_sensorFor & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
                 IsGrounded = true;
-            Debug.Log(i.normal.y);
         }
     }
     private void OnCollisionExit2D(Collision2D collision)

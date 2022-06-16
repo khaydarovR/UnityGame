@@ -6,7 +6,7 @@ using System;
 public class Events : MonoBehaviour
 {
 
-    public static event Action<bool> Air; // создание событие смерти перса
+    public static event Action<bool> Air; // 
 
     public static void OnAir(bool value)
     {

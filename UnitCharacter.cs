@@ -8,7 +8,10 @@ public class UnitCharacter : Unit
 
     [SerializeField] private CharacterInput _controlInput;
     [SerializeField] private Animator _animator;
+    //[SerializeField] private bool _blockInput;
 
+    [SerializeField] private SensorClimb _sensorClimb;
+    [SerializeField] private SensorWall _sensorWall;
 
     private void Start()
     {
@@ -22,12 +25,19 @@ public class UnitCharacter : Unit
 
 
         base.Walk(directionX);
+        base.ChangeDirection(directionX);
+
+        WallClimb();
 
         // анимация при падение
         if (base._onGround == true)
+        {
             _animator.SetBool("isJump", false);
+        }
         else
+        {
             _animator.SetBool("isJump", true);
+        }
 
         // анимация при ходьбе
         if (base._onGround == true)
@@ -47,20 +57,31 @@ public class UnitCharacter : Unit
             _animator.SetBool("isRun", false);
         }
 
+        if (_controlInput.IsRespawn())
+            base.RespawnToPoint(new Vector2(0, 2));
+    }
+
+    public void FixedUpdate()
+    {
         // анимация при прыжке
-        if (_controlInput.IsJump() && _controlInput.IsRun())
+        if (_controlInput.IsJump() && (_controlInput.IsWalk() || _controlInput.IsRun()))
         {
             base.Jump();
             _animator.SetBool("isJump", true);
         }
-     
 
-
-        if (_controlInput.IsRespawn())
-            base.RespawnToPoint(new Vector2(0,2));
-
-
+        AirVelocity(_controlInput.IsRun());
     }
+    // can -> IsClimb && isWall
+    //if can
+    //do anim, box colider
 
-
+    private void WallClimb()
+    {
+        if (_sensorClimb._isClimb && _sensorWall._isWall)
+        {
+            base.StopWall();
+            Debug.Log("зацеп");
+        }
+    }
 }
