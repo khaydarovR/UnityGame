@@ -4,16 +4,17 @@ using UnityEngine;
 
 public abstract class Unit : MonoBehaviour
 {
-    [SerializeField] private Rigidbody2D _rigidbody;
+    [SerializeField] protected Rigidbody2D _rigidbody;
     //[SerializeField] private BoxCollider2D _sencorGround;
 
-    [SerializeField] private int _walkSpead = 2;
+    [SerializeField] protected int _walkSpead = 2;
     [SerializeField] private int _runSpeed = 5;
     [SerializeField] private int _jumpForce = 6;
-    [SerializeField] private bool kindOfJamp = false;
+    private bool kindOfJamp = false;
     private bool _flag = false;
-    protected bool _onGround;
+    private bool _onGround;
     private bool _directionRight = true;
+    protected int _currentDirection; // -1 <-----> 1
 
     [SerializeField] private int _health;
     [SerializeField] private int _damage;
@@ -36,6 +37,11 @@ public abstract class Unit : MonoBehaviour
         Events.Air -= OnAir;
     }
 
+
+    protected bool GetIsGround()
+    {
+        return _onGround;
+    }
     //////////////////////
                          //////// BLOK 
     //////////////////////
@@ -85,11 +91,10 @@ public abstract class Unit : MonoBehaviour
     {
         if (_onGround == false)
         {
-            var _1 = 0;
             if (_directionRight == true)
-                _1 = 1;
+                _currentDirection = 1;
             else
-                _1 = -1;
+                _currentDirection = -1;
 
             if (_flag == false)
                 kindOfJamp = isRun;
@@ -97,20 +102,12 @@ public abstract class Unit : MonoBehaviour
 
 
             if (kindOfJamp == true)
-                _rigidbody.velocity = new Vector2(_1 * _runSpeed, _rigidbody.velocity.y);
+                _rigidbody.velocity = new Vector2(_currentDirection * _runSpeed, _rigidbody.velocity.y);
             else
-                _rigidbody.velocity = new Vector2(_1 * _walkSpead, _rigidbody.velocity.y);
+                _rigidbody.velocity = new Vector2(_currentDirection * _walkSpead, _rigidbody.velocity.y);
         }
         else
             _flag = false;
-
-    }
-
-    protected void StopWall()
-    {
-        //_rigidbody.transform.position = new Vector3(_rigidbody.transform.position.x, _rigidbody.transform.position.y, _rigidbody.transform.position.z);
-        Debug.Log("do climb");
-        _rigidbody.velocity = new Vector2(0,0);
     }
 
     protected void RespawnToPoint(Vector2 point)

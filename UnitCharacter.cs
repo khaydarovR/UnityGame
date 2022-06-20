@@ -2,21 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UnitCharacter : Unit
+public class UnitCharacter : Unit, IDiscoverable
 {
 
 
     [SerializeField] private CharacterInput _controlInput;
-    [SerializeField] private Animator _animator;
+    [SerializeField] private SensorGround _sensorGround;
+    [SerializeField] private SpriteRenderer _sprite;
+    private Animator _animator;
+    private BoxCollider2D _boxCollider;
     //[SerializeField] private bool _blockInput;
+    [SerializeField] private bool _isMoveCkimb;
 
     [SerializeField] private SensorClimb _sensorClimb;
+    [SerializeField] private Transform _climbPoint;
     [SerializeField] private SensorWall _sensorWall;
+
+    float progres = 0;
+    Vector2 startPos;
+    Vector2 toPoint;
 
     private void Start()
     {
         _animator = GetComponent<Animator>();
         _controlInput = GetComponent<CharacterInput>();
+        _boxCollider = GetComponent<BoxCollider2D>();
+        _sprite = GetComponent<SpriteRenderer>();
+
     }
     // описание вещей относящего только игроку
     private void Update()
@@ -27,10 +39,10 @@ public class UnitCharacter : Unit
         base.Walk(directionX);
         base.ChangeDirection(directionX);
 
-        WallClimb();
+        
 
         // анимация при падение
-        if (base._onGround == true)
+        if (base.GetIsGround() == true)
         {
             _animator.SetBool("isJump", false);
         }
@@ -40,7 +52,7 @@ public class UnitCharacter : Unit
         }
 
         // анимация при ходьбе
-        if (base._onGround == true)
+        if (base.GetIsGround() == true)
         {
             _animator.SetFloat("moveX", System.Math.Abs(directionX));
         }
@@ -49,7 +61,7 @@ public class UnitCharacter : Unit
         if (_controlInput.IsRun())
         {
             base.Run(directionX);
-            if (base._onGround == true)
+            if (base.GetIsGround() == true)
                 _animator.SetBool("isRun", true);
         }
         else
@@ -58,7 +70,8 @@ public class UnitCharacter : Unit
         }
 
         if (_controlInput.IsRespawn())
-            base.RespawnToPoint(new Vector2(0, 2));
+            base.RespawnToPoint(new Vector2(6, 2));
+
     }
 
     public void FixedUpdate()
@@ -69,19 +82,60 @@ public class UnitCharacter : Unit
             base.Jump();
             _animator.SetBool("isJump", true);
         }
+        if(_isMoveCkimb == false)
+            AirVelocity(_controlInput.IsRun());
 
-        AirVelocity(_controlInput.IsRun());
+        if (_controlInput.IsJump() || _isMoveCkimb == true)/////////////////////////////////
+            WallClimb();
+
+        //Debug.Log(_isMoveCkimb);
     }
-    // can -> IsClimb && isWall
-    //if can
-    //do anim, box colider
 
+    
     private void WallClimb()
     {
-        if (_sensorClimb._isClimb && _sensorWall._isWall)
+        
+        var canClimb = _sensorClimb.IsClimb();
+        var canWall = _sensorWall.IsWall();
+        
+        if ((canClimb && canWall) && (_isMoveCkimb == false || progres == 0)) ///////////////
         {
-            base.StopWall();
-            Debug.Log("зацеп");
+            _isMoveCkimb = true;
+            startPos = transform.position;
+            toPoint = _climbPoint.position;
+
+           
         }
+        else if (_isMoveCkimb == true)
+        {
+            base._rigidbody.velocity = new Vector2(0, 0);
+            _boxCollider.enabled = false;
+            _sensorGround.enabled = false;
+            _sensorClimb.enabled = false;
+            _sensorWall.enabled = false;
+            _animator.SetBool("isWallClimb", true);
+            transform.position = Vector2.Lerp(startPos, toPoint, progres);
+            progres += 0.02f;
+            if (progres > 0.9f)
+            {
+                
+                progres = 0;
+                _isMoveCkimb = false;
+                _boxCollider.enabled = true;
+                _sensorGround.enabled = true;
+                _sensorClimb.enabled = true;
+                _sensorWall.enabled = true;
+                _animator.SetBool("isWallClimb", false);
+                base._rigidbody.velocity = new Vector2(0, 0);
+            }
+        }
+    }
+
+    public void Detected(bool isDetected)
+    {
+        if (isDetected == true)
+            _sprite.color = Color.red;
+        else
+            _sprite.color = Color.white;
     }
 }

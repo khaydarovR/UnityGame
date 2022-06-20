@@ -6,22 +6,23 @@ public class SensorClimb : MonoBehaviour
 {
     [SerializeField] private LayerMask _sensorFor;
 
-    public bool _isClimb = false;
+    private bool _isClimb;
 
-    private void Start()
-    {
-
-     
-    }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        _isClimb = false;
+        if ((_sensorFor & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
+            _isClimb = false;
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        _isClimb = true;
+        if ((_sensorFor & 1 << collision.gameObject.layer) == 1 << collision.gameObject.layer)
+            _isClimb = true;
     }
 
+    public bool IsClimb()
+    {
+        return _isClimb;
+    }
 }

@@ -6,14 +6,13 @@ public class SensorGround : Sensor
 {
     //[SerializeField] private BoxCollider2D boxCollider2D;
 
-    private void Update()
+    private void FixedUpdate()
     {
 
         if (base.IsGrounded == true)
             Events.OnAir(false);
         else
             Events.OnAir(true);
-        Debug.Log("На земле:" + IsGrounded);
 
     }
 
