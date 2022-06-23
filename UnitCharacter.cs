@@ -9,14 +9,20 @@ public class UnitCharacter : Unit, IDiscoverable
     [SerializeField] private CharacterInput _controlInput;
     [SerializeField] private SensorGround _sensorGround;
     [SerializeField] private SpriteRenderer _sprite;
+    [SerializeField] private GameObject _particlAtac;
+
+
     private Animator _animator;
     private BoxCollider2D _boxCollider;
+    private Transform _transform;
     //[SerializeField] private bool _blockInput;
     [SerializeField] private bool _isMoveCkimb;
 
     [SerializeField] private SensorClimb _sensorClimb;
     [SerializeField] private Transform _climbPoint;
     [SerializeField] private SensorWall _sensorWall;
+    [SerializeField] private LayerMask _LayerForEnemy;
+
 
     float progres = 0;
     Vector2 startPos;
@@ -28,6 +34,7 @@ public class UnitCharacter : Unit, IDiscoverable
         _controlInput = GetComponent<CharacterInput>();
         _boxCollider = GetComponent<BoxCollider2D>();
         _sprite = GetComponent<SpriteRenderer>();
+        _transform = GetComponent<Transform>();
 
     }
     // описание вещей относящего только игроку
@@ -39,7 +46,8 @@ public class UnitCharacter : Unit, IDiscoverable
         base.Walk(directionX);
         base.ChangeDirection(directionX);
 
-        
+        _particlAtac.transform.localScale = new Vector2(_currentDirection, 1);
+
 
         // анимация при падение
         if (base.GetIsGround() == true)
@@ -70,8 +78,14 @@ public class UnitCharacter : Unit, IDiscoverable
         }
 
         if (_controlInput.IsRespawn())
-            base.RespawnToPoint(new Vector2(6, 2));
+            base.RespawnToPoint(new Vector2(16, 7));
 
+
+        if (_controlInput.IsDamage())
+        { 
+            Instantiate(_particlAtac,_transform.position, Quaternion.identity);
+            SetDamage();
+        }
     }
 
     public void FixedUpdate()
@@ -88,7 +102,8 @@ public class UnitCharacter : Unit, IDiscoverable
         if (_controlInput.IsJump() || _isMoveCkimb == true)/////////////////////////////////
             WallClimb();
 
-        //Debug.Log(_isMoveCkimb);
+        
+            
     }
 
     
@@ -138,4 +153,26 @@ public class UnitCharacter : Unit, IDiscoverable
         else
             _sprite.color = Color.white;
     }
+
+    public void SetDamage()
+    {
+        
+        {
+            RaycastHit2D _enemyInfo = Physics2D.Raycast(transform.position, base._currentDirection * transform.right, 0.8f, _LayerForEnemy);
+            Debug.DrawRay(transform.position, base._currentDirection * 0.8f * transform.right, Color.red);
+
+            if (_enemyInfo.collider == null)
+            {
+                return;
+            }
+            else if (_enemyInfo.collider.TryGetComponent(out IDamagable damagable))
+            {
+                damagable.GetDamage(base._damage);
+                
+
+            }
+        }
+        
+    }
+
 }

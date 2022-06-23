@@ -31,6 +31,11 @@ public class CharacterInput : MonoBehaviour
         return Input.GetKey(KeyCode.Space);
     }
 
+    public bool IsDamage()
+    {
+        return Input.GetKeyDown(KeyCode.E);
+    }
+
 
     public bool IsRespawn()
     {

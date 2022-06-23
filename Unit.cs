@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Unit : MonoBehaviour
+public abstract class Unit : MonoBehaviour, IDamagable
 {
     [SerializeField] protected Rigidbody2D _rigidbody;
-    //[SerializeField] private BoxCollider2D _sencorGround;
-
+    [SerializeField] protected GameObject _particalBlod;
+    [SerializeField] protected GameObject _particalJump;
     [SerializeField] protected int _walkSpead = 2;
     [SerializeField] private int _runSpeed = 5;
     [SerializeField] private int _jumpForce = 6;
@@ -16,8 +16,8 @@ public abstract class Unit : MonoBehaviour
     private bool _directionRight = true;
     protected int _currentDirection; // -1 <-----> 1
 
-    [SerializeField] private int _health;
-    [SerializeField] private int _damage;
+    [SerializeField] protected int _health;
+    [SerializeField] protected int _damage;
     
     private void Awake()
     {
@@ -65,6 +65,11 @@ public abstract class Unit : MonoBehaviour
             _rigidbody.transform.localScale *= new Vector2(-1, 1);
             _directionRight = true;
         }
+
+        if (_directionRight == true)
+            _currentDirection = 1;
+        else
+            _currentDirection = -1;
     }
 
     protected void Run (float directions)
@@ -78,7 +83,7 @@ public abstract class Unit : MonoBehaviour
         {
             var _2 = _rigidbody.velocity.x;
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce);
-
+            Instantiate(_particalJump, transform);
         }
 
     }
@@ -91,11 +96,6 @@ public abstract class Unit : MonoBehaviour
     {
         if (_onGround == false)
         {
-            if (_directionRight == true)
-                _currentDirection = 1;
-            else
-                _currentDirection = -1;
-
             if (_flag == false)
                 kindOfJamp = isRun;
             _flag = true;
@@ -115,4 +115,30 @@ public abstract class Unit : MonoBehaviour
         transform.position = point;
     }
 
+    public void GetDamage(int value)
+    {
+        Jump();
+        Instantiate(_particalBlod, transform);
+        _health -= value;
+        if (_health <= 0)
+        {
+            // через секунду
+            _rigidbody.AddForce(new Vector2(-1 * _jumpForce, 0.5f), ForceMode2D.Impulse);
+            gameObject.SetActive(false);
+        }
+            
+    }
+
+
+    void OnBecameVisible()
+    {
+        enabled = true;
+        //this.gameObject.SetActive(true);
+    }
+
+    void OnBecameInvisible()
+    {
+        enabled = false;
+        //this.gameObject.SetActive(false);
+    }
 }
