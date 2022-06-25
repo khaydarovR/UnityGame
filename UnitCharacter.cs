@@ -1,6 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
+
 
 public class UnitCharacter : Unit, IDiscoverable
 {
@@ -24,17 +24,20 @@ public class UnitCharacter : Unit, IDiscoverable
     [SerializeField] private LayerMask _LayerForEnemy;
 
 
+
     float progres = 0;
     Vector2 startPos;
     Vector2 toPoint;
 
     private void Start()
     {
+        base.StartAbstarktUnit();
         _animator = GetComponent<Animator>();
         _controlInput = GetComponent<CharacterInput>();
         _boxCollider = GetComponent<BoxCollider2D>();
         _sprite = GetComponent<SpriteRenderer>();
         _transform = GetComponent<Transform>();
+
 
     }
     // описание вещей относящего только игроку
@@ -168,11 +171,19 @@ public class UnitCharacter : Unit, IDiscoverable
             else if (_enemyInfo.collider.TryGetComponent(out IDamagable damagable))
             {
                 damagable.GetDamage(base._damage);
-                
 
             }
         }
         
+    }
+    public override void GetDamage(int value)
+    {
+        base.GetDamage(value);
+
+        if (base._health <= 0)
+        {
+            _sensorGround.gameObject.GetComponent<Collider2D>().isTrigger = true;
+        }
     }
 
 }

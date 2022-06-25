@@ -29,6 +29,8 @@ public class UnitWoman : Unit
         _animator = GetComponent<Animator>();
         base._currentDirection = 1;
         _curentEnergyWalk = 0;
+
+        base.StartAbstarktUnit();
     }
 
     private void FixedUpdate()
@@ -148,6 +150,17 @@ public class UnitWoman : Unit
                 _currentState = (int)WomanState.isSecurity;
             else if (_curentEnergyWalk < 0)
                 _currentState = (int)WomanState.isIdle;
+        }
+
+        
+    }
+    public override void GetDamage(int value)
+    {
+        base.GetDamage(value);
+
+        if (_currentState == (int)WomanState.isSecurity || _currentState == (int)WomanState.isIdle) //если обект в пасивном режиме
+        {
+            ChangeDirection(-_currentDirection);
         }
     }
 }

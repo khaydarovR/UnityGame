@@ -1,6 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
+using System.Collections;
 
 public abstract class Unit : MonoBehaviour, IDamagable
 {
@@ -16,23 +16,26 @@ public abstract class Unit : MonoBehaviour, IDamagable
     private bool _directionRight = true;
     protected int _currentDirection; // -1 <-----> 1
 
-    [SerializeField] protected int _health;
+    [SerializeField] protected float _health;
+    [SerializeField] protected float _maxHealth;
     [SerializeField] protected int _damage;
-    
+    [SerializeField] private Image _hpBarImage;
+
+
     private void Awake()
     {
         // Берёт информацию из евент менеджера
         Events.Air += OnAir; // подписка на канал EventManager.HealthChanged, вызов OnHealthChanged при оповещении
     }
 
-    private void Start()
+    protected void StartAbstarktUnit()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
-        //_sencorGround = GetComponent<BoxCollider2D>();
-
+        _health = _maxHealth;
+        _hpBarImage.fillAmount = _health / _maxHealth;
     }
 
-    private void OnDestroy()
+    protected void OnDestroy()
     {
         Events.Air -= OnAir;
     }
@@ -42,9 +45,7 @@ public abstract class Unit : MonoBehaviour, IDamagable
     {
         return _onGround;
     }
-    //////////////////////
-                         //////// BLOK 
-    //////////////////////
+
     protected void Walk(float directions)
     {
         _rigidbody.velocity = new Vector2(directions * _walkSpead, _rigidbody.velocity.y);
@@ -81,11 +82,18 @@ public abstract class Unit : MonoBehaviour, IDamagable
     {      
         if (_onGround == true)
         {
-            var _2 = _rigidbody.velocity.x;
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce);
             Instantiate(_particalJump, transform);
         }
 
+    }
+
+    protected void Reclining()
+    {
+        {
+            _rigidbody.velocity = new Vector2(_runSpeed * -_currentDirection, (float)_jumpForce/2);
+            Instantiate(_particalJump, transform);
+        }
     }
 
     protected void OnAir(bool onAir)
@@ -115,20 +123,27 @@ public abstract class Unit : MonoBehaviour, IDamagable
         transform.position = point;
     }
 
-    public void GetDamage(int value)
+    public virtual void GetDamage(int value)
     {
-        Jump();
+        Reclining();
         Instantiate(_particalBlod, transform);
-        _health -= value;
+        _health = ((int)_health) - value;
+        _hpBarImage.fillAmount = _health / _maxHealth;
+
         if (_health <= 0)
         {
-            // через секунду
-            _rigidbody.AddForce(new Vector2(-1 * _jumpForce, 0.5f), ForceMode2D.Impulse);
-            gameObject.SetActive(false);
+            Reclining();
+            _rigidbody.GetComponent<Collider2D>().isTrigger = true;
+
+            StartCoroutine(Death());
         }
             
     }
-
+    IEnumerator Death()
+    {
+        yield return new WaitForSeconds(1f);
+        Destroy(this.gameObject);
+    }
 
     void OnBecameVisible()
     {
